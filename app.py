@@ -10,24 +10,24 @@ import pandas as pd
 import io
 
 # 페이지 설정
-st.set_page_config(page_title="수강생 분석 도구", layout="wide")
+st.set_page_config(page_title="SW 기초교과목 이수자 분석 도구", layout="wide")
 
-st.title("📊 수강생 정렬 및 분석 시스템")
+st.title("SW기초교과목 이수자 분석 프로그램")
 st.markdown("엑셀 파일을 업로드하면 정렬 규칙에 따라 데이터를 정리하고 분석 결과를 보여줍니다.")
 
 # 1. 파일 업로드
-uploaded_file = st.file_uploader("엑셀 파일을 업로드하세요 (.xlsx)", type=['xlsx', 'xls'])
+uploaded_file = st.file_uploader("CSV 파일을 업로드하세요 (.CSV)")
 
 if uploaded_file is not None:
     try:
         # 데이터 로드
-        df = pd.read_excel(uploaded_file)
+        df = pd.read_csv(uploaded_file)
         
         # --- 필수 컬럼 확인 및 매핑 (사용자 파일에 맞게 수정 필요) ---
         # 예시: 사용자의 엑셀 컬럼명이 다를 경우를 대비해 변수로 관리
         col_id = '학번'
-        col_grade = '학년'
-        col_subject = '수강과목'
+        col_grade = '학년(수강시점)'
+        col_subject = '교과목명'
         
         # 필수 컬럼이 있는지 확인
         required_cols = [col_id, col_grade, col_subject]
@@ -41,10 +41,10 @@ if uploaded_file is not None:
 
         # 2. 정렬 로직 구현
         # 1순위: 학년 (1 -> 4)
-        # 2순위: 수강과목 (컴퓨팅사고와 인공지능 -> 기초컴퓨터프로그래밍)
+        # 2순위: 수강과목 ('컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문')
         
         # 과목 정렬 순서 지정 (Categorical 타입 활용)
-        custom_order = ["컴퓨팅사고와 인공지능", "기초컴퓨터프로그래밍"]
+        custom_order = ['컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문']
         
         # 지정된 과목 외의 과목이 있을 경우를 대비해 순서 목록 확장
         existing_subjects = df[col_subject].unique()
@@ -58,9 +58,9 @@ if uploaded_file is not None:
         df_sorted = df.sort_values(by=[col_grade, col_subject], ascending=[True, True])
 
         # 3. 중복 제거
-        # 기준: 학번과 수강과목이 같으면 중복으로 간주 (동일 학생이 동일 과목 중복 수강 신청된 경우)
-        # 만약 과목 상관없이 학생 자체의 중복을 제거하려면 subset=[col_id] 로 변경
-        df_dedup = df_sorted.drop_duplicates(subset=[col_id, col_subject], keep='first')
+        # 기준: 학번이 같으면 중복으로 간주 (동일 학생이 동일 과목 중복 수강 신청된 경우)
+        # 만약 동일 학생이 동일 과목 이수시에만 학생 중복을 제거하려면 df_dedup = df_sorted.drop_duplicates(subset=[col_id, col_subject], keep='first') 로 변경
+        df_dedup = df_sorted.drop_duplicates(subset=[col_id])
         
         # 결과 보여주기
         st.subheader("1. 정렬 및 중복 제거 완료 데이터")
@@ -109,4 +109,5 @@ if uploaded_file is not None:
         st.warning("엑셀 파일의 컬럼명('학번', '학년', '수강과목')과 데이터 형식을 확인해주세요.")
 
 else:
+
     st.info("파일을 업로드하면 분석이 시작됩니다.")

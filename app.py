@@ -39,6 +39,7 @@ if uploaded_file is not None:
         col_subject = '교과목명'
         col_class = '분반'
         col_semester = '학기'
+        col_year = '학년도'
         
         # 필수 컬럼 확인
         required_cols = [col_id, col_grade, col_subject, col_class, col_semester]
@@ -49,6 +50,9 @@ if uploaded_file is not None:
         # --- 데이터 전처리 ---
         # 학년 데이터 숫자형 변환 (예: "1학년" -> 1)
         df[col_grade] = df[col_grade].astype(str).str.extract(r'(\d+)').astype(float).fillna(0).astype(int)
+
+        # 년도 추출
+        year = df[col_year].astype(str).str.extract(r'(\d{4})')[0].mode()[0]
 
         # 2. 정렬 로직 (사용자 지정 순서)
         custom_order = ['컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문']
@@ -201,7 +205,7 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
             data=output.getvalue(),
-            file_name="SW기초교과목_이수자_분석결과_최종.xlsx",
+            file_name=f"{year}_SW기초교과목_이수자_분석결과_최종.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
@@ -215,6 +219,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

@@ -33,7 +33,7 @@ if uploaded_file is not None:
         # 데이터 로드
         df = pd.read_csv(uploaded_file)
         
-        # --- 필수 컬럼 설정 ---
+        # --- 필수 컬럼 설정 --- (중요!! 매년 이 부분 확인)
         col_id = '학번'
         col_grade = '학년(수강시점)'
         col_subject = '교과목명'
@@ -54,7 +54,7 @@ if uploaded_file is not None:
         # 년도 추출
         year = df[col_year].astype(str).str.extract(r'(\d{4})')[0].mode()[0]
 
-        # 2. 정렬 로직 (사용자 지정 순서)
+        # 2. 정렬 로직 (중요!! 매년 이 부분 확인)
         custom_order = ['컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문']
         
         existing_subjects = df[col_subject].unique()
@@ -219,6 +219,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

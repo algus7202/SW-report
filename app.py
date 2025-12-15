@@ -120,7 +120,7 @@ if uploaded_file is not None:
         final_stats = final_stats.fillna(0).astype(int)
         
         # 컬럼명 설정 (요청사항 반영)
-        final_stats.columns = ['개설분반수', '전체수강생(중복자제거후)', '일학년수강생(중복자제거후)']
+        final_stats.columns = ['개설분반수', '전체수강생(중복자제거후)', '1학년수강생(중복자제거후)']
 
         # ---------------------------------------------------------
         # [계산] 상단 5대 주요 지표
@@ -219,6 +219,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

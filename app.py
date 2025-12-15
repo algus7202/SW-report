@@ -72,6 +72,8 @@ if uploaded_file is not None:
         
         # 엑셀 저장용 리스트 (보기 좋게 정렬)
         section_list_df = unique_sections.sort_values(by=[col_subject, col_semester, col_class])
+        section_list_df = section_list_df.reset_index(drop=True)
+        section_list_df.index = section_list_df.index + 1
         
         # 통계용: 과목별 분반 개수 카운트
         class_counts_df = unique_sections.groupby(col_subject, observed=True).size().to_frame(name='개설분반수')
@@ -213,6 +215,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

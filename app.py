@@ -61,8 +61,7 @@ if uploaded_file is not None:
         df_sorted = df.sort_values(by=[col_grade, col_subject, col_semester], ascending=[True, True, True])
 
         # 분반 수 계산 로직 변경 ---
-        # 기존: 단순히 과목별로 분반 이름이 몇 개인지 셈 -> 학기가 달라도 분반 이름이 같으면 1개로 침 (오류)
-        # 변경: [과목, 학기, 분반] 3가지 정보가 유니크한 조합을 먼저 찾고, 그 개수를 셈
+        # [과목, 학기, 분반] 3가지 정보가 유니크한 조합을 먼저 찾고, 그 개수를 셈
         
         # 1) 과목, 학기, 분반 정보만 추출하여 중복 제거 (순수 개설 강좌 목록)
         unique_sections = df_sorted[[col_subject, col_semester, col_class]].drop_duplicates()
@@ -146,6 +145,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

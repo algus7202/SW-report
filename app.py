@@ -14,6 +14,7 @@ Created on Sun Dec 14 21:26:07 2025
 import streamlit as st
 import pandas as pd
 import io
+from datetime import datetime
 
 # 페이지 설정
 st.set_page_config(page_title="SW 기초교과목 이수자 분석 도구", layout="wide")
@@ -189,6 +190,9 @@ if uploaded_file is not None:
         # [출력] 엑셀 다운로드 (4개 시트)
         # ---------------------------------------------------------
         output = io.BytesIO()
+        # 오늘 날짜 추출
+        today = datetime.now().strftime("%Y%m%d")
+        
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # 시트 1: 전체 수강자 명단 (중복자 제거)
             df_dedup.to_excel(writer, index=True, sheet_name='전체수강자')
@@ -205,7 +209,7 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
             data=output.getvalue(),
-            file_name=f"{year}_SW기초교과목_수강자_분석결과_최종.xlsx",
+            file_name=f"{year}_SW기초교과목_이수자분석결과({stat_unique_freshmen})_{today}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
@@ -219,6 +223,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

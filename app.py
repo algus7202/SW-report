@@ -61,7 +61,8 @@ if uploaded_file is not None:
         df[col_subject] = pd.Categorical(df[col_subject], categories=final_order, ordered=True)
         
         # 전체 데이터 정렬 (학기 -> 학년 -> 과목 순)
-        df_sorted = df.sort_values(by=[col_semester, col_grade, col_subject], ascending=[True, True, True])
+        #df_sorted = df.sort_values(by=[col_semester, col_grade, col_subject], ascending=[True, True, True])
+        df_sorted = df.sort_values(by=[col_grade, col_subject], ascending=[True, True])
 
         # ---------------------------------------------------------
         # [분석 1] 개설 분반 분석 (개설분반리스트 시트용)
@@ -99,7 +100,7 @@ if uploaded_file is not None:
         # 과목별 수강생 수 집계
         student_counts_df = df_dedup.groupby(col_subject, observed=True).agg(
             전체수강생=(col_id, 'count'),
-            일학년수강생=(col_grade, lambda x: (x == 1).sum())
+            일학년수강생=(col_grade, lambda x: (x == 1).count())
         )
 
         # 분반 수 + 수강생 수 병합
@@ -119,14 +120,15 @@ if uploaded_file is not None:
         # [계산] 상단 5대 주요 지표
         # ---------------------------------------------------------
         # 1. 총 수강 건수: 통계표의 전체 수강생 합 (학생수 * 과목수)
-        stat_total_enrollments = final_stats['전체수강생(중복자제거후)'].sum()
+        #stat_total_enrollments = final_stats['전체수강생(중복자제거후)'].sum()
+        stat_total_enrollments = len(df)
         
         # 2. 중복을 제거한 이수자 건수: 순수 학번(ID)의 개수
-        stat_unique_students = df_dedup[col_id].nunique()
+        stat_unique_students = len(df_dedup)
         
         # 3. 중복을 제거한 1학년 이수자 건수: 순수 1학년 학번(ID)의 개수
         # (전체 데이터 중 1학년인 행들의 학번 유니크 카운트)
-        stat_unique_freshmen = df_sorted[df_sorted[col_grade] == 1][col_id].nunique()
+        stat_unique_freshmen = len(df_freshman)
         
         # 4. 분석된 과목 수
         stat_subject_count = len(final_stats)
@@ -197,7 +199,7 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
             data=output.getvalue(),
-            file_name="수강생분석결과_최종.xlsx",
+            file_name="SW기초교과목_이수자_분석결과_최종.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
@@ -210,4 +212,5 @@ if uploaded_file is not None:
         st.warning("데이터 파일의 컬럼명('학번', '학년', '교과목명', '분반', '학기')을 확인해주세요.")
 
 else:
-    st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.")
+    st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+

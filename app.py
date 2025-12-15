@@ -63,6 +63,10 @@ if uploaded_file is not None:
         # 기준: 학번이 같으면 중복으로 간주 (동일 학생이 동일 과목 중복 수강 신청된 경우)
         # 만약 동일 학생이 동일 과목 이수시에만 학생 중복을 제거하려면 df_dedup = df_sorted.drop_duplicates(subset=[col_id, col_subject], keep='first') 로 변경
         df_dedup = df_sorted.drop_duplicates(subset=[col_id])
+
+        # 인덱스 재설정 (1번부터 시작하도록)
+        df_dedup = df_dedup.reset_index(drop=True)
+        df_dedup.index = df_dedup.index + 1
         
         # 결과 보여주기
         st.subheader("1. 정렬 및 중복 제거 완료 데이터")
@@ -92,10 +96,14 @@ if uploaded_file is not None:
             일학년수강생=(col_grade, lambda x: (x == 1).sum())
         ).reset_index()
 
+        # 통계 표 인덱스도 1번부터 시작하도록 설정
+        subject_stats.index = subject_stats.index + 1
+        
        # 전체 메트릭 계산
         total_students = len(df_dedup)
         total_classes = subject_stats['개설분반수'].sum() # 전체 분반 합계
 
+               
         # 메트릭 표시
         c1, c2, c3 = st.columns(3)
         c1.metric("총 수강 인원", f"{total_students}명")
@@ -126,6 +134,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

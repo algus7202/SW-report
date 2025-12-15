@@ -38,7 +38,7 @@ if uploaded_file is not None:
         # --- 데이터 전처리 ---
         # 학년 데이터 숫자형 변환 (예: "1학년" -> 1) 시도, 이미 숫자면 패스
         # 수정안
-        df[col_grade] = df[col_grade].astype(str).str.extract(r'(\d+)', expand=False).fillna(0).astype(int))
+        df[col_grade] = df[col_grade].astype(str).str.extract(r'(\d+)', expand=False).fillna(0).astype(int)
 
         # 2. 정렬 로직 구현
         # 1순위: 학년 (1 -> 4)
@@ -112,4 +112,5 @@ if uploaded_file is not None:
 else:
 
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 

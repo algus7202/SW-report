@@ -86,7 +86,7 @@ if uploaded_file is not None:
         st.markdown("##### 과목별 상세 현황")
         
         # 과목별 그룹화
-      subject_stats = df_dedup.groupby(col_subject, observed=True).agg(
+        subject_stats = df_dedup.groupby(col_subject, observed=True).agg(
             개설분반수=(col_class, 'nunique'), 
             전체수강생=(col_id, 'count'),
             일학년수강생=(col_grade, lambda x: (x == 1).sum())
@@ -126,5 +126,6 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 

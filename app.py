@@ -193,10 +193,10 @@ if uploaded_file is not None:
             df_freshman.to_excel(writer, index=True, sheet_name='1학년이수자')
             
             # 시트 3: 개설 분반 리스트 (NEW)
-            section_list_df.to_excel(writer, index=False, sheet_name='개설분반리스트')
+            section_list_df.to_excel(writer, index=True, sheet_name='개설분반리스트')
 
             # 시트 4: 통계 분석 (합계 포함)
-            final_stats_with_sum.to_excel(writer, index=False, sheet_name='통계분석')
+            final_stats_with_sum.to_excel(writer, index=True, sheet_name='통계분석')
         
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
@@ -215,6 +215,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

@@ -158,7 +158,7 @@ if uploaded_file is not None:
         final_stats_with_sum = pd.concat([final_stats_display, sum_row], ignore_index=True)
         
         # 4. 컬럼 순서 재배치
-        cols = [col_subject, '개설분반수', '전체수강생(중복자제거후)', '일학년수강생(중복자제거후)']
+        cols = [col_subject, '개설분반수', '전체수강생(중복자제거후)', '1학년수강생(중복자제거후)']
         final_stats_with_sum = final_stats_with_sum[cols]
 
         # 5. 인덱스 정리 (1, 2, 3... 하고 마지막 합계는 빈칸으로)
@@ -173,9 +173,9 @@ if uploaded_file is not None:
 
         # 5개 지표 출력
         m1, m2, m3, m4, m5 = st.columns(5)
-        m1.metric("총 수강건수(학생)", f"{stat_total_enrollments}건")
-        m2.metric("실 이수자(중복제거)", f"{stat_unique_students}명")
-        m3.metric("1학년 실 이수자", f"{stat_unique_freshmen}명")
+        m1.metric("파일 총 건수", f"{stat_total_enrollments}건")
+        m2.metric("총 수강자(중복제거)", f"{stat_unique_students}명")
+        m3.metric("1학년 수강자(중복제거)", f"{stat_unique_freshmen}명")
         m4.metric("분석된 과목수", f"{stat_subject_count}개")
         m5.metric("총 개설분반", f"{stat_total_sections}개")
 
@@ -190,11 +190,11 @@ if uploaded_file is not None:
         # ---------------------------------------------------------
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            # 시트 1: 전체 이수자 명단 (정렬됨)
-            df_dedup.to_excel(writer, index=True, sheet_name='전체이수자')
+            # 시트 1: 전체 수강자 명단 (중복자 제거)
+            df_dedup.to_excel(writer, index=True, sheet_name='전체수강자')
             
-            # 시트 2: 1학년 이수자 명단 (NEW)
-            df_freshman.to_excel(writer, index=True, sheet_name='1학년이수자')
+            # 시트 2: 1학년 이수자 명단 (중복자 제거) 
+            df_freshman.to_excel(writer, index=True, sheet_name='1학년수강자')
             
             # 시트 3: 개설 분반 리스트 (NEW)
             section_list_df.to_excel(writer, index=True, sheet_name='개설분반리스트')
@@ -205,12 +205,12 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
             data=output.getvalue(),
-            file_name=f"{year}_SW기초교과목_이수자_분석결과_최종.xlsx",
+            file_name=f"{year}_SW기초교과목_수강자_분석결과_최종.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
         # 참고용 미리보기 (접을 수 있음)
-        with st.expander("데이터 미리보기 (전체 이수자 명단)"):
+        with st.expander("데이터 미리보기 (전체 수강자 명단: 중복자 제거)"):
              st.dataframe(df_dedup)
 
     except Exception as e:
@@ -219,6 +219,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

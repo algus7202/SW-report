@@ -100,7 +100,7 @@ if uploaded_file is not None:
         # 과목별 수강생 수 집계
         student_counts_df = df_dedup.groupby(col_subject, observed=True).agg(
             전체수강생=(col_id, 'count'),
-            일학년수강생=(col_grade, lambda x: (x == 1).count())
+            일학년수강생=(col_grade, lambda x: (x == 1).sum()
         )
 
         # 분반 수 + 수강생 수 병합
@@ -213,4 +213,5 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 

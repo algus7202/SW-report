@@ -59,6 +59,10 @@ if uploaded_file is not None:
         # 정렬 실행
         df_sorted = df.sort_values(by=[col_grade, col_subject], ascending=[True, True])
 
+        # 분반 수 계산 (중복 제거 '전' 데이터인 df_sorted 사용)
+        # observed=True: 범주형 데이터 순서 유지
+        class_counts = df_sorted.groupby(col_subject, observed=True)[col_class].nunique()
+
         # 3. 중복 제거
         # 기준: 학번이 같으면 중복으로 간주 (동일 학생이 동일 과목 중복 수강 신청된 경우)
         # 만약 동일 학생이 동일 과목 이수시에만 학생 중복을 제거하려면 df_dedup = df_sorted.drop_duplicates(subset=[col_id, col_subject], keep='first') 로 변경
@@ -134,6 +138,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

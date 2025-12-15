@@ -8,7 +8,7 @@ Created on Mon Dec 15 17:06:15 2025
 # -*- coding: utf-8 -*-
 """
 Created on Sun Dec 14 21:26:07 2025
-@author: algus
+@author: Mihyun Park
 """
 
 import streamlit as st
@@ -219,6 +219,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

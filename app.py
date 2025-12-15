@@ -58,7 +58,7 @@ if uploaded_file is not None:
         df[col_subject] = pd.Categorical(df[col_subject], categories=final_order, ordered=True)
         
         # 정렬 (학년 -> 과목 -> 학기   순으로 정렬하면 보기 좋음)
-        df_sorted = df.sort_values(by=[col_grade, col_subject, col_semester, ], ascending=[True, True, True])
+        df_sorted = df.sort_values(by=[col_grade, col_subject, col_semester], ascending=[True, True, True])
 
         # 분반 수 계산 로직 변경 ---
         # 기존: 단순히 과목별로 분반 이름이 몇 개인지 셈 -> 학기가 달라도 분반 이름이 같으면 1개로 침 (오류)
@@ -146,6 +146,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

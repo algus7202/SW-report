@@ -12,7 +12,7 @@ import io
 st.set_page_config(page_title="SW 기초교과목 이수자 분석 도구", layout="wide")
 
 st.title("SW기초교과목 이수자 분석 프로그램")
-st.markdown("엑셀(CSV) 파일을 업로드하면 정렬 및 분석 결과를 보여줍니다. (중복 제거 통계 및 합계 행 포함)")
+st.markdown("엑셀(CSV) 파일을 업로드하면 정렬 및 분석 결과를 보여줍니다. (개설 분반 리스트 시트 추가)")
 
 # 1. 파일 업로드
 uploaded_file = st.file_uploader("CSV 파일을 업로드하세요 (.CSV)", type=['csv'])
@@ -46,26 +46,36 @@ if uploaded_file is not None:
         remaining_subjects = [x for x in existing_subjects if x not in custom_order]
         final_order = custom_order + remaining_subjects
         
-        # Categorical 변환
+        # Categorical 변환 (정렬 순서 적용)
         df[col_subject] = pd.Categorical(df[col_subject], categories=final_order, ordered=True)
         
-        # 전체 데이터 정렬
-        df_sorted = df.sort_values(by=[col_grade, col_subject, col_semester], ascending=[True, True, True])
+        # 전체 데이터 정렬 (학기 -> 학년 -> 과목 순)
+        df_sorted = df.sort_values(by=[col_semester, col_grade, col_subject], ascending=[True, True, True])
 
-        # --- 분석 1: 분반 수 계산 (전체 데이터 기준) ---
-        # [과목, 학기, 분반] 고유 조합 추출
+        # --- 분석 1: 분반 정보 추출 ---
+        # [과목, 학기, 분반] 고유 조합 추출 (순수 개설 강좌 목록)
         unique_sections = df_sorted[[col_subject, col_semester, col_class]].drop_duplicates()
+        
+        # [NEW] 엑셀 저장용 분반 리스트 정렬 (과목 -> 학기 -> 분반 순서로 보기 좋게)
+        section_list_df = unique_sections.sort_values(by=[col_subject, col_semester, col_class])
+        
+        # 분반 수 카운트 (통계용)
         class_counts_df = unique_sections.groupby(col_subject, observed=True).size().to_frame(name='개설분반수')
 
-        # --- 분석 2: 학생 수 계산 (학생 중복 제거 기준) ---
-        # [학번] 기준으로 중복 제거 (한 과목을 여러번 들어도 1명으로 카운트)
-        df_dedup = df_sorted.drop_duplicates(subset=[col_id])
+        # --- 분석 2: 학생 수 계산 ---
+        # [학번, 과목] 기준으로 중복 제거
+        df_dedup = df_sorted.drop_duplicates(subset=[col_id, col_subject])
         
         # 인덱스 재설정
         df_dedup = df_dedup.reset_index(drop=True)
         df_dedup.index = df_dedup.index + 1
         
-        # 정제된 명단 출력
+        # 1학년 데이터 별도 추출
+        df_freshman = df_dedup[df_dedup[col_grade] == 1].copy()
+        df_freshman = df_freshman.reset_index(drop=True)
+        df_freshman.index = df_freshman.index + 1
+
+        # 정제된 명단 화면 출력
         st.subheader("1. 정렬 및 중복 제거 완료 데이터")
         st.dataframe(df_dedup, use_container_width=True)
 
@@ -84,47 +94,27 @@ if uploaded_file is not None:
             how='outer'
         )
         final_stats = final_stats.fillna(0).astype(int)
-
-        # 컬럼명 변경 (요청하신 대로)
         final_stats.columns = ['개설분반수', '전체수강생(중복후제거)', '일학년수강생(중복후제거)']
 
-        # --- [상단 5대 주요 지표 계산] ---
-        
-        # 1. 총 수강 건수 (각 과목별 수강생 합계)
+        # --- 상단 5대 주요 지표 계산 ---
         stat_total_enrollments = final_stats['전체수강생(중복후제거)'].sum()
-        
-        # 2. 중복 제거한 이수자 건수 (전체 데이터에서 고유 학번 수)
-        # df_dedup은 [학번, 과목] 유니크이므로, 순수 학번 유니크는 df_dedup[col_id].nunique()로 계산
         stat_unique_students = df_dedup[col_id].nunique()
-        
-        # 3. 중복 제거한 1학년 이수자 건수 (전체 데이터에서 1학년인 고유 학번 수)
-        # 전체 이력 중 1학년인 행만 뽑아서 학번 중복 제거
         stat_unique_freshmen = df_sorted[df_sorted[col_grade] == 1][col_id].nunique()
-        
-        # 4. 분석된 과목 수
         stat_subject_count = len(final_stats)
-        
-        # 5. 총 개설 분반 수
         stat_total_sections = final_stats['개설분반수'].sum()
 
-        # --- [합계 행 생성 로직] ---
-        # 1. 인덱스(교과목명)를 컬럼으로 변환
+        # --- 합계 행 생성 ---
         final_stats_display = final_stats.reset_index().rename(columns={'index': col_subject})
         if col_subject not in final_stats_display.columns: 
             final_stats_display.rename(columns={final_stats_display.columns[0]: col_subject}, inplace=True)
 
-        # 2. 합계 행 계산
         sum_row = final_stats.sum(numeric_only=True).to_frame().T
-        sum_row[col_subject] = '합계' # 교과목명 자리에 '합계' 입력
+        sum_row[col_subject] = '합계'
         
-        # 3. 합치기
         final_stats_with_sum = pd.concat([final_stats_display, sum_row], ignore_index=True)
-        
-        # 4. 컬럼 순서 재배치
         cols = [col_subject, '개설분반수', '전체수강생(중복후제거)', '일학년수강생(중복후제거)']
         final_stats_with_sum = final_stats_with_sum[cols]
 
-        # 5. 인덱스 정리 (1번부터, 합계는 빈칸)
         new_index = list(range(1, len(final_stats_with_sum))) + ['']
         final_stats_with_sum.index = new_index
 
@@ -132,7 +122,6 @@ if uploaded_file is not None:
         st.divider()
         st.subheader("2. 과목별 상세 분석 결과")
 
-        # 5개 지표 출력
         m1, m2, m3, m4, m5 = st.columns(5)
         m1.metric("총 수강건수(학생)", f"{stat_total_enrollments}건")
         m2.metric("실 이수자(중복제거)", f"{stat_unique_students}명")
@@ -140,10 +129,9 @@ if uploaded_file is not None:
         m4.metric("분석된 과목수", f"{stat_subject_count}개")
         m5.metric("총 개설분반", f"{stat_total_sections}개")
 
-        # 합계가 포함된 테이블 출력
         st.dataframe(final_stats_with_sum, use_container_width=True)
 
-       # 엑셀 다운로드
+        # 엑셀 다운로드
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             # 시트 1: 전체 이수자 명단
@@ -171,4 +159,3 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
-

@@ -26,11 +26,12 @@ if uploaded_file is not None:
         # --- 필수 컬럼 확인 및 매핑 (사용자 파일에 맞게 수정 필요) ---
         # 예시: 사용자의 엑셀 컬럼명이 다를 경우를 대비해 변수로 관리
         col_id = '학번'
-        col_grade = '학년(수강시점)'
+        col_grade = '학년(수강시점)' # <--- 매번 컬럼명 확인 필요 
         col_subject = '교과목명'
+        col_class = '분반'
         
         # 필수 컬럼이 있는지 확인
-        required_cols = [col_id, col_grade, col_subject]
+        required_cols = [col_id, col_grade, col_subject, col_class]
         if not all(col in df.columns for col in required_cols):
             st.error(f"엑셀 파일에 다음 컬럼이 반드시 포함되어야 합니다: {required_cols}")
             st.stop()
@@ -85,15 +86,29 @@ if uploaded_file is not None:
         st.markdown("##### 과목별 상세 현황")
         
         # 과목별 그룹화
-        subject_stats = df_dedup.groupby(col_subject, observed=True).agg(
+      subject_stats = df_dedup.groupby(col_subject, observed=True).agg(
+            개설분반수=(col_class, 'nunique'), 
             전체수강생=(col_id, 'count'),
             일학년수강생=(col_grade, lambda x: (x == 1).sum())
         ).reset_index()
 
+       # 전체 메트릭 계산
+        total_students = len(df_dedup)
+        total_classes = subject_stats['개설분반수'].sum() # 전체 분반 합계
+
+        # 메트릭 표시
+        c1, c2, c3 = st.columns(3)
+        c1.metric("총 수강 인원", f"{total_students}명")
+        c2.metric("총 개설 분반", f"{total_classes}개")
+        c3.metric("분석된 과목 수", f"{len(subject_stats)}개")
+
+        # 테이블 표시
         st.dataframe(subject_stats, use_container_width=True)
 
-        # (선택) 엑셀 다운로드 버튼
+       # 엑셀 다운로드
         output = io.BytesIO()
+        # xlsxwriter 엔진이 없으면 에러가 날 수 있으니 engine 제거하거나 설치 필요
+        # 기본값(openpyxl) 사용을 위해 engine 파라미터 생략 가능
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
             df_dedup.to_excel(writer, index=False, sheet_name='정렬된데이터')
             subject_stats.to_excel(writer, index=False, sheet_name='통계분석')
@@ -101,16 +116,15 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드",
             data=output.getvalue(),
-            file_name="수강생분석결과.xlsx",
+            file_name="수강생분석결과_분반포함.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
     except Exception as e:
         st.error(f"오류가 발생했습니다: {e}")
-        st.warning("엑셀 파일의 컬럼명('학번', '학년', '수강과목')과 데이터 형식을 확인해주세요.")
+        st.warning("CSV 파일의 컬럼명('학번', '학년', '교과목명', '분반')을 확인해주세요.")
 
 else:
-
     st.info("파일을 업로드하면 분석이 시작됩니다.")
 
 

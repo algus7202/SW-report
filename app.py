@@ -102,7 +102,7 @@ if uploaded_file is not None:
         
         # 과목별 그룹화
         subject_stats = df_dedup.groupby(col_subject, observed=True).agg(
-            개설분반수=(col_class, 'nunique'), 
+            개설분반수=(class_counts, 'nunique'), 
             전체수강생=(col_id, 'count'),
             일학년수강생=(col_grade, lambda x: (x == 1).sum())
         ).reset_index()
@@ -145,6 +145,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

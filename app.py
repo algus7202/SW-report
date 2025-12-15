@@ -209,7 +209,7 @@ if uploaded_file is not None:
         st.download_button(
             label="결과 엑셀 다운로드 (시트 4개 포함)",
             data=output.getvalue(),
-            file_name=f"{year}_SW기초교과목_이수자분석결과({stat_unique_freshmen})_{today}.xlsx",
+            file_name=f"{year}_SW기초교과목_이수자분석결과_{today}({stat_unique_freshmen}).xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
         
@@ -223,6 +223,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 

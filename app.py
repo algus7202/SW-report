@@ -29,9 +29,10 @@ if uploaded_file is not None:
         col_grade = '학년(수강시점)' # <--- 매번 컬럼명 확인 필요 
         col_subject = '교과목명'
         col_class = '분반'
+        col_semester = '학기' # <--- 학기 구분을 위한 컬럼
         
         # 필수 컬럼이 있는지 확인
-        required_cols = [col_id, col_grade, col_subject, col_class]
+        required_cols = [col_id, col_grade, col_subject, col_class, col_semester]
         if not all(col in df.columns for col in required_cols):
             st.error(f"엑셀 파일에 다음 컬럼이 반드시 포함되어야 합니다: {required_cols}")
             st.stop()
@@ -56,12 +57,19 @@ if uploaded_file is not None:
         # Categorical 데이터로 변환하여 정렬 순서 강제
         df[col_subject] = pd.Categorical(df[col_subject], categories=final_order, ordered=True)
         
-        # 정렬 실행
-        df_sorted = df.sort_values(by=[col_grade, col_subject], ascending=[True, True])
+        # 정렬 (학년 -> 과목 -> 학기   순으로 정렬하면 보기 좋음)
+        df_sorted = df.sort_values(by=[col_grade, col_subject, col_semester, ], ascending=[True, True, True])
 
-        # 분반 수 계산 (중복 제거 '전' 데이터인 df_sorted 사용)
-        # observed=True: 범주형 데이터 순서 유지
-        class_counts = df_sorted.groupby(col_subject, observed=True)[col_class].nunique()
+        # 분반 수 계산 로직 변경 ---
+        # 기존: 단순히 과목별로 분반 이름이 몇 개인지 셈 -> 학기가 달라도 분반 이름이 같으면 1개로 침 (오류)
+        # 변경: [과목, 학기, 분반] 3가지 정보가 유니크한 조합을 먼저 찾고, 그 개수를 셈
+        
+        # 1) 과목, 학기, 분반 정보만 추출하여 중복 제거 (순수 개설 강좌 목록)
+        unique_sections = df_sorted[[col_subject, col_semester, col_class]].drop_duplicates()
+        
+        # 2) 과목별로 몇 개의 행(강좌)이 있는지 카운트
+        class_counts = unique_sections.groupby(col_subject, observed=True).size()
+        class_counts.name = '개설분반수' # Series 이름 설정
 
         # 3. 중복 제거
         # 기준: 학번이 같으면 중복으로 간주 (동일 학생이 동일 과목 중복 수강 신청된 경우)
@@ -138,6 +146,7 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+
 
 
 

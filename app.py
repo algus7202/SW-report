@@ -143,11 +143,19 @@ if uploaded_file is not None:
         # 합계가 포함된 테이블 출력
         st.dataframe(final_stats_with_sum, use_container_width=True)
 
-        # 엑셀 다운로드
+       # 엑셀 다운로드
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df_dedup.to_excel(writer, index=True, sheet_name='정렬된데이터')
-            # 합계가 포함된 통계표 저장 (인덱스 제외하고 깔끔하게)
+            # 시트 1: 전체 이수자 명단
+            df_dedup.to_excel(writer, index=True, sheet_name='전체이수자(정렬됨)')
+            
+            # 시트 2: 1학년 이수자 명단
+            df_freshman.to_excel(writer, index=True, sheet_name='1학년이수자')
+            
+            # 시트 3: [NEW] 개설 분반 리스트 (과목/학기/분반)
+            section_list_df.to_excel(writer, index=False, sheet_name='개설분반리스트')
+
+            # 시트 4: 통계 분석 (합계 포함)
             final_stats_with_sum.to_excel(writer, index=False, sheet_name='통계분석')
         
         st.download_button(
@@ -163,3 +171,4 @@ if uploaded_file is not None:
 
 else:
     st.info("파일을 업로드하면 분석이 시작됩니다.")
+

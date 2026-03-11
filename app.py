@@ -56,8 +56,11 @@ if uploaded_file is not None:
         year = df[col_year].astype(str).str.extract(r'(\d{4})')[0].mode()[0]
 
         # 2. 정렬 로직 (중요!! 매년 이 부분 확인)
-        custom_order = ['컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문']
-        
+        # 2026년 1학기 SW교과목 전면 개편
+        # custom_order = ['컴퓨팅사고와인공지능', '기초컴퓨터프로그래밍','IT환경에서의개인정보보호','멀티미디어의이해와활용','디지털리터러시의 이해와 활용','컴퓨터 시뮬레이션', '컴퓨터프로그래밍입문']
+        custom_order = ['인공지능과디지털사고', '기초컴퓨터프로그래밍',  'AI기반컴퓨터프로그래밍입문', 'AI기반컴퓨터시뮬레이션',  '데이터분석과AI의이해', '디지털리터러시의 이해와 활용',
+                        'AI활용과지역사회문제해결', 'AI로표현하는나의이야기',  'IT환경에서의개인정보보호', '멀티미디어의이해와활용']
+
         existing_subjects = df[col_subject].unique()
         remaining_subjects = [x for x in existing_subjects if x not in custom_order]
         final_order = custom_order + remaining_subjects
@@ -223,6 +226,7 @@ if uploaded_file is not None:
 
 else:
     st.info("CSV 파일을 업로드하면 자동으로 분석이 시작됩니다.(파일 비밀번호 제거) ")
+
 
 
 
